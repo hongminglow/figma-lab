@@ -11,7 +11,7 @@ function App() {
         Refresh
       </button>
 
-      <div className="flex-col mt-4 bg-[#1A1E24] px-2.5 py-4 rounded-[10px] drop-shadow-[0px_3px_5px_0px_#00000066] shadow-[0px_1px_1px_0px_#FFFFFF4D_inset] flex items-center justify-center">
+      <div className="gradient-border-container flex-col mt-4 bg-[#1A1E24] px-2.5 py-4 rounded-[10px] drop-shadow-[0px_3px_5px_0px_#00000066] shadow-[0px_1px_1px_0px_#FFFFFF4D_inset] flex items-center justify-center">
         <div className="grid grid-cols-5 w-full p-2 gap-1.5 bg-linear-to-b rounded-lg from-[rgba(33,32,32,0.6)] to-[rgba(22,22,22,0.6)]">
           <span className="col-span-5 text-white place-self-center">1:8</span>
           {Array.from({ length: 10 }).map((_, index) => (
