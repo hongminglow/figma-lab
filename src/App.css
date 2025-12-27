@@ -68,3 +68,63 @@ linear-gradient(180deg, #A0917E 0%, #4B3C2A 100%); */
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
+
+.glass-button-border {
+  background-image: linear-gradient(
+    151.7deg,
+    rgba(255, 255, 255, 0.7) 8.19%,
+    rgba(255, 255, 255, 0.14) 49.06%,
+    rgba(255, 255, 255, 0.7) 89.94%
+  );
+}
+
+.glass-button {
+  position: relative;
+  isolation: isolate;
+  background: #ffffff29;
+  background-blend-mode: color;
+  background-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0) 61.01%,
+      rgba(255, 255, 255, 0.2) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0) 44.05%
+    );
+}
+
+.glass-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+
+  /* 1px gradient stroke (Figma border-image-source equivalent) */
+  padding: 1px;
+  /* Base silver stroke + strong corner highlights (top-left & bottom-right) */
+  background:
+    /* corner highlights */ conic-gradient(
+      from 45deg,
+      rgba(255, 255, 255, 0.1) 0deg 75deg,
+      rgba(255, 255, 255, 0.5) 82deg 100deg,
+      rgba(255, 255, 255, 0.1) 110deg 255deg,
+      rgba(255, 255, 255, 0.5) 262deg 280deg,
+      rgba(255, 255, 255, 0.1) 290deg 360deg
+    ),
+    /* silver-ish sides */
+      linear-gradient(
+        151.7deg,
+        rgba(255, 255, 255, 0.5) 8.19%,
+        rgba(255, 255, 255, 0.12) 49.06%,
+        rgba(255, 255, 255, 0.35) 89.94%
+      );
+
+  /* Cut out the middle so only the ring remains */
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
