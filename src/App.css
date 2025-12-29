@@ -3,7 +3,13 @@
 /* border: 2px solid;
 border-image-source: linear-gradient(180deg, #1D262D 0%, #12161A 100%),
 linear-gradient(180deg, #A0917E 0%, #4B3C2A 100%); */
-
+@theme {
+  --linear-gradient-red-blue: linear-gradient(
+    58.52deg,
+    #c6314d 22.37%,
+    #2a2aeb 87.66%
+  );
+}
 .blended-even-inside::after {
   content: "";
   position: absolute;
@@ -127,4 +133,109 @@ linear-gradient(180deg, #A0917E 0%, #4B3C2A 100%); */
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
+}
+
+.silver-corner-btn {
+  /* Auto layout */
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 3.2px;
+  gap: 6.4px;
+
+  position: relative;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0) 44.05%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0) 61.01%,
+      rgba(255, 255, 255, 0.2) 100%
+    ),
+    rgba(255, 255, 255, 0.16);
+  background-blend-mode: normal, color, normal;
+  box-shadow: inset -2.10725px -2.10725px 0.6px -2.45846px #ffffff,
+    inset 2.80967px 2.80967px 1.58044px -4px #ffffff;
+  backdrop-filter: blur(1.5px);
+  /* Note: backdrop-filter has minimal browser support */
+  border-radius: 10px;
+  border: 1px solid;
+  border-image: linear-gradient(
+    151.7deg,
+    rgba(255, 255, 255, 0.7) 8.19%,
+    rgba(255, 255, 255, 0.14) 49.06%,
+    rgba(255, 255, 255, 0.7) 89.94%
+  );
+}
+
+.multi-blue-layer-btn {
+  --multi-blue-outer-stroke: 3.33px;
+  --multi-blue-inner-stroke: 3.33px;
+  --multi-blue-inner-inset: 3px;
+  position: relative;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #12c3e2 100%),
+    radial-gradient(
+      19.31% 15.05% at 50% 100.77%,
+      rgba(255, 253, 250, 0.6) 1%,
+      rgba(255, 253, 250, 0.6) 3%,
+      rgba(128, 128, 128, 0) 100%
+    ),
+    #060d3f;
+  border-radius: 100px;
+  isolation: isolate;
+  min-height: 100px;
+  min-width: 300px;
+  margin-block: 10px;
+}
+.multi-blue-layer-btn::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  border-radius: inherit;
+  pointer-events: none;
+  box-sizing: border-box;
+  padding: var(--multi-blue-outer-stroke);
+  background: linear-gradient(180deg, #f2f1f0 0%, #7f7875 100%),
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0) 41.31%,
+      rgba(0, 0, 0, 0.2) 50.11%,
+      rgba(0, 0, 0, 0) 65.66%
+    );
+
+  /* Cut out the middle so only the ring remains */
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.multi-blue-layer-btn::after {
+  position: absolute;
+  inset: var(--multi-blue-inner-inset);
+  content: "";
+  border-radius: inherit;
+  pointer-events: none;
+  box-sizing: border-box;
+  padding: var(--multi-blue-inner-stroke);
+  background: linear-gradient(
+    183.67deg,
+    rgba(255, 255, 255, 0.4) 3.01%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.2) 96.99%
+  );
+  background-blend-mode: soft-light;
+
+  /* Cut out the middle so only the ring remains */
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 1;
 }
