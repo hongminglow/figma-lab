@@ -1,4 +1,5 @@
 import "./App.css";
+import { CountDownTimer } from "./component/CountDownTimer";
 
 function App() {
   return (
@@ -75,6 +76,8 @@ function App() {
           </button>
         </div>
       </div>
+
+      <CountDownTimer />
     </div>
   );
 }
