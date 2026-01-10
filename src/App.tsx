@@ -1,4 +1,5 @@
 import "./App.css";
+import { AnimatedVersusBar } from "./component/AnimatedVersusBar";
 import { CountDownTimer } from "./component/CountDownTimer";
 
 function App() {
@@ -40,6 +41,8 @@ function App() {
           2
         </button>
       </div>
+
+     <AnimatedVersusBar />
 
       <div className="multi-blue-layer-btn" />
 

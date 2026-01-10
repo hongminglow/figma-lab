@@ -9,6 +9,36 @@ linear-gradient(180deg, #A0917E 0%, #4B3C2A 100%); */
     #c6314d 22.37%,
     #2a2aeb 87.66%
   );
+  --linear-silver-gray-black: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0) 44.05%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0) 61.01%,
+      rgba(255, 255, 255, 0.2) 100%
+    ),
+    linear-gradient(#ffffff29, #ffffff29);
+  --linear-blue-white: linear-gradient(
+      271.34deg,
+      #258cf4 15.75%,
+      #1e66e3 90.41%
+    ),
+    linear-gradient(0deg, #d9d9d9, #d9d9d9);
+  --linear-red-white: linear-gradient(270deg, #d11c1f 6.96%, #af1215 96.54%),
+    linear-gradient(
+      270deg,
+      #ffffff 1.47%,
+      #d11c1f 13.6%,
+      #d11c1f 72.77%,
+      #af1215 96.54%
+    );
+  --linear-blue-dark-blue: linear-gradient(
+    36.67deg,
+    #258cf4 19.33%,
+    #2525f4 115.23%
+  );
 }
 .blended-even-inside::after {
   content: "";
@@ -238,4 +268,73 @@ linear-gradient(180deg, #A0917E 0%, #4B3C2A 100%); */
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   z-index: 1;
+}
+
+/* Electric Border CSS */
+.electric-border {
+  --electric-light-color: oklch(from var(--electric-border-color) l c h);
+  position: relative;
+  border-radius: inherit;
+  overflow: visible;
+  isolation: isolate;
+}
+
+.eb-canvas-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.eb-canvas {
+  display: block;
+}
+
+.eb-content {
+  position: relative;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.eb-layers {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.eb-glow-1,
+.eb-glow-2,
+.eb-background-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.eb-glow-1 {
+  border: 2px solid oklch(from var(--electric-border-color) l c h / 0.6);
+  filter: blur(1px);
+}
+
+.eb-glow-2 {
+  border: 2px solid var(--electric-light-color);
+  filter: blur(4px);
+}
+
+.eb-background-glow {
+  z-index: -1;
+  transform: scale(1.1);
+  filter: blur(32px);
+  opacity: 0.3;
+  background: linear-gradient(
+    -30deg,
+    var(--electric-light-color),
+    transparent,
+    var(--electric-border-color)
+  );
 }
