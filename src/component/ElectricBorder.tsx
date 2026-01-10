@@ -8,23 +8,34 @@ import React, {
 
 interface ElectricBorderProps {
   children?: ReactNode;
+  variant?: "blue" | "red";
   color?: string;
   speed?: number;
   chaos?: number;
-  borderRadius?: number;
+  borderRadius?:
+    | number
+    | {
+        tl?: number;
+        tr?: number;
+        br?: number;
+        bl?: number;
+      };
   className?: string;
   style?: CSSProperties;
 }
 
 const ElectricBorder: React.FC<ElectricBorderProps> = ({
   children,
-  color = "#5227FF",
+  variant = "blue",
+  color,
   speed = 0.8,
   chaos = 0.04,
   borderRadius = 45,
   className,
   style,
 }) => {
+  const effectiveColor = color ?? (variant === "red" ? "#FF4D4D" : "#82DCFF");
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number | null>(null);
@@ -111,6 +122,40 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
     []
   );
 
+  const normalizeCornerRadii = useCallback(
+    (
+      width: number,
+      height: number,
+      radii: { tl: number; tr: number; br: number; bl: number }
+    ): { tl: number; tr: number; br: number; bl: number } => {
+      const tl = Math.max(0, radii.tl);
+      const tr = Math.max(0, radii.tr);
+      const br = Math.max(0, radii.br);
+      const bl = Math.max(0, radii.bl);
+
+      const scaleWTop = tl + tr > 0 ? width / (tl + tr) : 1;
+      const scaleWBottom = bl + br > 0 ? width / (bl + br) : 1;
+      const scaleHLeft = tl + bl > 0 ? height / (tl + bl) : 1;
+      const scaleHRight = tr + br > 0 ? height / (tr + br) : 1;
+
+      const scale = Math.min(
+        1,
+        scaleWTop,
+        scaleWBottom,
+        scaleHLeft,
+        scaleHRight
+      );
+
+      return {
+        tl: tl * scale,
+        tr: tr * scale,
+        br: br * scale,
+        bl: bl * scale,
+      };
+    },
+    []
+  );
+
   const getRoundedRectPoint = useCallback(
     (
       t: number,
@@ -118,97 +163,132 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
       top: number,
       width: number,
       height: number,
-      radius: number
+      radii: { tl: number; tr: number; br: number; bl: number }
     ): { x: number; y: number } => {
-      const straightWidth = width - 2 * radius;
-      const straightHeight = height - 2 * radius;
-      const cornerArc = (Math.PI * radius) / 2;
+      const normalized = normalizeCornerRadii(width, height, radii);
+      const tl = normalized.tl;
+      const tr = normalized.tr;
+      const br = normalized.br;
+      const bl = normalized.bl;
+
+      const topStraight = Math.max(0, width - tl - tr);
+      const rightStraight = Math.max(0, height - tr - br);
+      const bottomStraight = Math.max(0, width - br - bl);
+      const leftStraight = Math.max(0, height - bl - tl);
+
+      const tlArc = (Math.PI * tl) / 2;
+      const trArc = (Math.PI * tr) / 2;
+      const brArc = (Math.PI * br) / 2;
+      const blArc = (Math.PI * bl) / 2;
+
       const totalPerimeter =
-        2 * straightWidth + 2 * straightHeight + 4 * cornerArc;
-      const distance = t * totalPerimeter;
+        topStraight +
+        trArc +
+        rightStraight +
+        brArc +
+        bottomStraight +
+        blArc +
+        leftStraight +
+        tlArc;
 
-      let accumulated = 0;
-
-      if (distance <= accumulated + straightWidth) {
-        const progress = (distance - accumulated) / straightWidth;
-        return { x: left + radius + progress * straightWidth, y: top };
+      if (totalPerimeter <= 0) {
+        return { x: left, y: top };
       }
-      accumulated += straightWidth;
 
-      if (distance <= accumulated + cornerArc) {
-        const progress = (distance - accumulated) / cornerArc;
+      const distance = ((t % 1) + 1) % 1;
+      let remaining = distance * totalPerimeter;
+
+      // Top edge (left -> right)
+      if (remaining <= topStraight) {
+        const progress = topStraight === 0 ? 0 : remaining / topStraight;
+        return { x: left + tl + progress * topStraight, y: top };
+      }
+      remaining -= topStraight;
+
+      // Top-right arc
+      if (remaining <= trArc) {
+        const progress = trArc === 0 ? 0 : remaining / trArc;
         return getCornerPoint(
-          left + width - radius,
-          top + radius,
-          radius,
+          left + width - tr,
+          top + tr,
+          tr,
           -Math.PI / 2,
           Math.PI / 2,
           progress
         );
       }
-      accumulated += cornerArc;
+      remaining -= trArc;
 
-      if (distance <= accumulated + straightHeight) {
-        const progress = (distance - accumulated) / straightHeight;
-        return { x: left + width, y: top + radius + progress * straightHeight };
+      // Right edge (top -> bottom)
+      if (remaining <= rightStraight) {
+        const progress = rightStraight === 0 ? 0 : remaining / rightStraight;
+        return {
+          x: left + width,
+          y: top + tr + progress * rightStraight,
+        };
       }
-      accumulated += straightHeight;
+      remaining -= rightStraight;
 
-      if (distance <= accumulated + cornerArc) {
-        const progress = (distance - accumulated) / cornerArc;
+      // Bottom-right arc
+      if (remaining <= brArc) {
+        const progress = brArc === 0 ? 0 : remaining / brArc;
         return getCornerPoint(
-          left + width - radius,
-          top + height - radius,
-          radius,
+          left + width - br,
+          top + height - br,
+          br,
           0,
           Math.PI / 2,
           progress
         );
       }
-      accumulated += cornerArc;
+      remaining -= brArc;
 
-      if (distance <= accumulated + straightWidth) {
-        const progress = (distance - accumulated) / straightWidth;
+      // Bottom edge (right -> left)
+      if (remaining <= bottomStraight) {
+        const progress = bottomStraight === 0 ? 0 : remaining / bottomStraight;
         return {
-          x: left + width - radius - progress * straightWidth,
+          x: left + width - br - progress * bottomStraight,
           y: top + height,
         };
       }
-      accumulated += straightWidth;
+      remaining -= bottomStraight;
 
-      if (distance <= accumulated + cornerArc) {
-        const progress = (distance - accumulated) / cornerArc;
+      // Bottom-left arc
+      if (remaining <= blArc) {
+        const progress = blArc === 0 ? 0 : remaining / blArc;
         return getCornerPoint(
-          left + radius,
-          top + height - radius,
-          radius,
+          left + bl,
+          top + height - bl,
+          bl,
           Math.PI / 2,
           Math.PI / 2,
           progress
         );
       }
-      accumulated += cornerArc;
+      remaining -= blArc;
 
-      if (distance <= accumulated + straightHeight) {
-        const progress = (distance - accumulated) / straightHeight;
+      // Left edge (bottom -> top)
+      if (remaining <= leftStraight) {
+        const progress = leftStraight === 0 ? 0 : remaining / leftStraight;
         return {
           x: left,
-          y: top + height - radius - progress * straightHeight,
+          y: top + height - bl - progress * leftStraight,
         };
       }
-      accumulated += straightHeight;
+      remaining -= leftStraight;
 
-      const progress = (distance - accumulated) / cornerArc;
+      // Top-left arc
+      const progress = tlArc === 0 ? 0 : Math.min(1, remaining / tlArc);
       return getCornerPoint(
-        left + radius,
-        top + radius,
-        radius,
+        left + tl,
+        top + tl,
+        tl,
         Math.PI,
         Math.PI / 2,
         progress
       );
     },
-    [getCornerPoint]
+    [getCornerPoint, normalizeCornerRadii]
   );
 
   useEffect(() => {
@@ -257,7 +337,7 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.scale(dpr, dpr);
 
-      ctx.strokeStyle = color;
+      ctx.strokeStyle = effectiveColor;
       ctx.lineWidth = 1;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
@@ -267,11 +347,32 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
       const top = borderOffset;
       const borderWidth = width - 2 * borderOffset;
       const borderHeight = height - 2 * borderOffset;
-      const maxRadius = Math.min(borderWidth, borderHeight) / 2;
-      const radius = Math.min(borderRadius, maxRadius);
+      const rawRadii =
+        typeof borderRadius === "number"
+          ? {
+              tl: borderRadius,
+              tr: borderRadius,
+              br: borderRadius,
+              bl: borderRadius,
+            }
+          : {
+              tl: borderRadius.tl ?? 0,
+              tr: borderRadius.tr ?? 0,
+              br: borderRadius.br ?? 0,
+              bl: borderRadius.bl ?? 0,
+            };
+      const r = normalizeCornerRadii(borderWidth, borderHeight, rawRadii);
 
+      const topStraight = Math.max(0, borderWidth - r.tl - r.tr);
+      const rightStraight = Math.max(0, borderHeight - r.tr - r.br);
+      const bottomStraight = Math.max(0, borderWidth - r.br - r.bl);
+      const leftStraight = Math.max(0, borderHeight - r.bl - r.tl);
       const approximatePerimeter =
-        2 * (borderWidth + borderHeight) + 2 * Math.PI * radius;
+        topStraight +
+        rightStraight +
+        bottomStraight +
+        leftStraight +
+        (Math.PI / 2) * (r.tl + r.tr + r.br + r.bl);
       const sampleCount = Math.floor(approximatePerimeter / 2);
 
       ctx.beginPath();
@@ -285,7 +386,7 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
           top,
           borderWidth,
           borderHeight,
-          radius
+          r
         );
 
         const xNoise = octavedNoise(
@@ -342,18 +443,34 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
       }
       resizeObserver.disconnect();
     };
-  }, [color, speed, chaos, borderRadius, octavedNoise, getRoundedRectPoint]);
+  }, [
+    effectiveColor,
+    speed,
+    chaos,
+    borderRadius,
+    octavedNoise,
+    getRoundedRectPoint,
+  ]);
+
+  const radiusStyle: CSSProperties =
+    typeof borderRadius === "number"
+      ? { borderRadius }
+      : {
+          borderTopLeftRadius: borderRadius.tl ?? 0,
+          borderTopRightRadius: borderRadius.tr ?? 0,
+          borderBottomRightRadius: borderRadius.br ?? 0,
+          borderBottomLeftRadius: borderRadius.bl ?? 0,
+        };
 
   const vars = {
-    "--electric-border-color": color,
-    borderRadius,
+    "--electric-border-color": effectiveColor,
   } as CSSProperties;
 
   return (
     <div
       ref={containerRef}
       className={`electric-border ${className ?? ""}`}
-      style={{ ...vars, ...style }}
+      style={{ ...vars, ...radiusStyle, ...style }}
     >
       <div className="eb-canvas-container">
         <canvas ref={canvasRef} className="eb-canvas" />

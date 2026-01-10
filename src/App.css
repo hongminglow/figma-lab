@@ -39,6 +39,11 @@ linear-gradient(180deg, #A0917E 0%, #4B3C2A 100%); */
     #258cf4 19.33%,
     #2525f4 115.23%
   );
+  --linear-red-dark-red: linear-gradient(
+    153.59deg,
+    #f42528 25.62%,
+    #8e1651 121.48%
+  );
 }
 .blended-even-inside::after {
   content: "";
@@ -317,20 +322,20 @@ linear-gradient(180deg, #A0917E 0%, #4B3C2A 100%); */
 }
 
 .eb-glow-1 {
-  border: 2px solid oklch(from var(--electric-border-color) l c h / 0.6);
+  border: 2px solid oklch(from var(--electric-border-color) l c h / 0.75);
   filter: blur(1px);
 }
 
 .eb-glow-2 {
-  border: 2px solid var(--electric-light-color);
-  filter: blur(4px);
+  border: 2px solid oklch(from var(--electric-border-color) l c h / 0.95);
+  filter: blur(6px);
 }
 
 .eb-background-glow {
   z-index: -1;
   transform: scale(1.1);
   filter: blur(32px);
-  opacity: 0.3;
+  opacity: 0.45;
   background: linear-gradient(
     -30deg,
     var(--electric-light-color),
