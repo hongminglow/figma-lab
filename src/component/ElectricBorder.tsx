@@ -12,6 +12,9 @@ interface ElectricBorderProps {
   color?: string;
   speed?: number;
   chaos?: number;
+  active?: boolean;
+  revealProgress?: number;
+  revealFrom?: "left" | "right";
   borderRadius?:
     | number
     | {
@@ -30,11 +33,29 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
   color,
   speed = 0.8,
   chaos = 0.04,
+  active = true,
+  revealProgress = 1,
+  revealFrom = "left",
   borderRadius = 45,
   className,
   style,
 }) => {
   const effectiveColor = color ?? (variant === "red" ? "#FF4D4D" : "#82DCFF");
+
+  const clampedReveal = Math.max(0, Math.min(1, revealProgress));
+
+  const clipInset = (1 - clampedReveal) * 100;
+  const revealClipPath =
+    revealFrom === "right"
+      ? (`inset(0 0 0 ${clipInset}%)` as const)
+      : (`inset(0 ${clipInset}% 0 0)` as const);
+
+  const effectStyle: CSSProperties = {
+    clipPath: revealClipPath,
+    transition: "clip-path 600ms ease-out, opacity 200ms ease-out",
+    willChange: "clip-path, opacity",
+    opacity: active ? 1 : 0,
+  };
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -318,6 +339,7 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
       canvas.height = height * dpr;
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.scale(dpr, dpr);
 
       return { width, height };
@@ -327,6 +349,12 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
 
     const drawElectricBorder = (currentTime: number) => {
       if (!canvas || !ctx) return;
+
+      if (!active) {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
 
       const deltaTime = (currentTime - lastFrameTimeRef.current) / 1000;
       timeRef.current += deltaTime * speed;
@@ -435,7 +463,9 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
     });
     resizeObserver.observe(container);
 
-    animationRef.current = requestAnimationFrame(drawElectricBorder);
+    if (active) {
+      animationRef.current = requestAnimationFrame(drawElectricBorder);
+    }
 
     return () => {
       if (animationRef.current) {
@@ -444,10 +474,12 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
       resizeObserver.disconnect();
     };
   }, [
+    active,
     effectiveColor,
     speed,
     chaos,
     borderRadius,
+    normalizeCornerRadii,
     octavedNoise,
     getRoundedRectPoint,
   ]);
@@ -472,13 +504,13 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
       className={`electric-border ${className ?? ""}`}
       style={{ ...vars, ...radiusStyle, ...style }}
     >
-      <div className="eb-canvas-container">
+      <div className="eb-canvas-container" style={effectStyle}>
         <canvas ref={canvasRef} className="eb-canvas" />
       </div>
-      <div className="eb-layers">
+      <div className="eb-layers" style={effectStyle}>
         <div className="eb-glow-1" />
         <div className="eb-glow-2" />
-        <div className="eb-background-glow" />
+        {/* <div className="eb-background-glow" /> */}
       </div>
       <div className="eb-content relative">{children}</div>
     </div>
